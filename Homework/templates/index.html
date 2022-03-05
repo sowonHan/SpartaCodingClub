@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+
+    <title>원페이지 쇼핑몰 연습</title>
+
+    <meta property="og:title" content="원페이지 쇼핑몰"/>
+    <meta property="og:description" content="내가 만든 첫 웹서비스!"/>
+    <meta property="og:image" content="{{ url_for('static', filename='ogimage.jpg') }}"/>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Noto Serif KR', serif;
+        }
+
+        .image {
+            width: 500px;
+            height: 300px;
+            margin: 40px auto 20px auto;
+            background-image: url("https://cafe24img.poxo.com/andar01/web/product/extra/big/202010/4b33986cbec184906a16aeec5c256d65.jpg");
+            background-size: cover;
+            background-position: center;
+        }
+
+        .exp {
+            width: 500px;
+            margin: auto;
+        }
+
+        .more_exp {
+            font-size: 15px;
+            margin: 15px auto 10px auto;
+        }
+
+        .button {
+            width: 100px;
+            margin: 25px auto auto auto;
+        }
+
+        .dollar {
+            color: blue;
+            margin: auto auto 20px auto;
+        }
+
+        .list {
+            margin-top: 100px;
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+            q1();
+            showList();
+        });
+
+        function q1() {
+            $.ajax({
+                type: "GET",
+                url: "https://api.manana.kr/exchange/rate.json",
+                data: {},
+                success: function (response) {
+                    let dol = response[1]['rate']
+                    let temp_html = `${dol}`
+                    $('#money').append(temp_html)
+
+                }
+            })
+        }
+
+        function makeList() {
+            let name = $('#name-box').val()
+            let option = $('#inputGroupSelect01').val()
+            let address = $('#adr-box').val()
+            let number = $('#cell-box').val()
+
+            $.ajax({
+                type: "POST",
+                url: "/order",
+                data: {name_give: name, op_give: option, adr_give: address, cell_give: number},
+                success: function (response) {
+                    alert(response["msg"]);
+                    window.location.reload();
+                }
+            })
+        }
+
+        function showList() {
+            $.ajax({
+                type: "GET",
+                url: "/order",
+                data: {},
+                success: function (response) {
+                    let list = response['all_orders']
+                    for (let i = 0; i < list.length; i++) {
+                        let name = list[i]['name']
+                        let option = list[i]['option']
+                        let address = list[i]['address']
+                        let number = list[i]['number']
+
+                        let temp_html = `<tr>
+                                            <th scope="row">${name}</th>
+                                            <td>${option}</td>
+                                            <td>${address}</td>
+                                            <td>${number}</td>
+                                        </tr>`
+                        $('#list-box').append(temp_html)
+                    }
+                }
+            })
+        }
+
+    </script>
+</head>
+
+<body>
+<div class="image"></div>
+<div class="exp">
+    <h1><span style="font-weight: bold;"> 마사지볼 </span> <span style="font-size: 17px;">가격 : 4,000원 / 개</span></h1>
+    <div class="more_exp">
+        작지만 단단한 마사지볼! 마사지볼은 우리 몸에 뭉쳐있는 근육들을 풀어주고 혈액이 순환되도록 도와줍니다.
+        운동과 병행하면서 꾸준히 마사지를 하면 더욱 더 건강해질 수 있습니다!
+    </div>
+    <div class="dollar">
+        달러-원 환율 : <span id="money"></span>
+    </div>
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">주문자 성함</span>
+        </div>
+        <input type="text" class="form-control" aria-label="Default"
+               aria-describedby="inputGroup-sizing-default" id="name-box">
+    </div>
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <label class="input-group-text" for="inputGroupSelect01">옵션</label>
+        </div>
+        <select class="custom-select" id="inputGroupSelect01">
+            <option selected>-- 옵션 및 수량을 선택하세요. --</option>
+            <option>단일볼 1개</option>
+            <option>땅콩볼 1개</option>
+            <option>단일볼 1 + 땅콩볼 1</option>
+        </select>
+    </div>
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text">주소</span>
+        </div>
+        <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default"
+               id="adr-box">
+    </div>
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-default">전화번호</span>
+        </div>
+        <input type="text" class="form-control" aria-label="Default"
+               aria-describedby="inputGroup-sizing-default" id="cell-box">
+    </div>
+    <div class="button">
+        <button onclick="makeList()" type="button" class="btn btn-primary">주문하기</button>
+    </div>
+    <div class="list">
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">성함</th>
+                <th scope="col">옵션</th>
+                <th scope="col">주소</th>
+                <th scope="col">전화번호</th>
+            </tr>
+            </thead>
+            <tbody id="list-box">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+
+</html>
